@@ -1,0 +1,50 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from numpy import cos,sin
+#For creating slider
+import ipywidgets as widgets
+#defining function
+def f(t,y):
+  return cos(t)
+#Function to be inputted in slider widget
+def curve_changer(N):
+  #calculating step size
+    k=4.0/N
+    #Creation of a list with size (d+1) which will contain values of function at each step.
+    y_R=[None]*int(N+1)
+    #Value of function at 0
+    y_R[0]=0
+    #Creating list for collecting the t value at each step
+    t_R=[None]*int(N+1)
+    #Initial value of t
+    t_R[0]=float(0)
+    for i in range(1,int(N+1)):
+      #Adding values of t to the list at each step
+      t_R[i]=float(k*i)
+      #Finding y value at each step and adding it to the list.
+      y_R[i]=k*f(k*(i-1),y_R[i-1])+y_R[i-1]
+    print("Function's value at 4")
+    print(y_R[int(N)])
+    #Plotting the Euler approximated function
+    plt.subplot(1,2,1)
+    plt.plot(t_R,y_R,color="blue")
+    plt.title("Euler Approximation")
+    plt.xlabel("t")
+    plt.ylabel("y")
+    #Giving y axis range
+    plt.ylim(-1,1.25)
+    #Plotting sine function as a subplot
+    #Creating an numpy array -Initial  value-0,Final value-4,Step=0.0001
+    t_Rn=np.arange(0.0,4.0,0.0001)
+    #Creating numpy array containing sine of the values in t_Rn
+    r = np.sin(t_Rn)
+    plt.subplot(1,2,2)
+    plt.plot(t_Rn,r,color="red")
+    plt.title("Exact solution")
+    plt.xlabel("t")
+    plt.ylabel("y")
+    #Giving y axis range
+    plt.ylim(-1,1.25)
+    plt.show()
+#Function to create slider-Paramters-(Function to update the curve,N value=(start,end,step))
+widgets.interact(curve_changer,N=(1,150,1))
