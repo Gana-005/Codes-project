@@ -3,14 +3,14 @@ import numpy as np
 from numpy import cos,sin
 #For creating slider
 import ipywidgets as widgets
-#defining function
+#defining function f,(dy/dt=f)
 def f(t,y):
   return cos(t)
 #Function to be inputted in slider widget
 def curve_changer(N):
   #calculating step size
     k=4.0/N
-    #Creation of a list with size (d+1) which will contain values of function at each step.
+    #Creation of a list with size (N+1) which will contain values of function at each step.
     y_R=[None]*int(N+1)
     #Value of function at 0
     y_R[0]=0
@@ -33,7 +33,7 @@ def curve_changer(N):
     plt.ylabel("y")
     #Giving y axis range
     plt.ylim(-1,1.25)
-    #Plotting sine function as a subplot
+    #Plotting sine function(real solution) as a subplot
     #Creating an numpy array -Initial  value-0,Final value-4,Step=0.0001
     t_Rn=np.arange(0.0,4.0,0.0001)
     #Creating numpy array containing sine of the values in t_Rn
