@@ -1,0 +1,72 @@
+import numpy as np
+from math import e
+def function(t,y):
+  return np.cos(t*y)
+def solution(t):
+  return (e**t)+(t-5)**2
+def solution_derivative(t):
+  return (e**t)+2*(t-5)
+#here it's dy/dt-f(t,y)
+def source(t,y):
+  return solution_derivative(t)-function(t,y)
+step_size=[None]*6
+N_array=[None]*6
+#For calculating step size and number of steps and storing it
+for i in range(0,6):
+  step_size[i]=2**(-(i+1))
+  N_array[i]=4.0/step_size[i]
+
+#Dictionary containing arrays of y for each h_k
+ydict={}
+for i in range(0,6):
+  ydict[i]=[None]*int(N_array[i]+1)
+  #For eg: key 0 contains y array for h_1
+  ydict[i][0]=26
+
+#Dictionary containing arrays of t value for each h_k
+tdict={}
+for i in range(0,6):
+  tdict[i]=[None]*(int(N_array[i])+1)
+  tdict[i][0]=0
+
+#Dictionary containing arrays of exact values at t's for each h_k
+valuedict={}
+for i in range(0,6):
+  valuedict[i]=[None]*(int(N_array[i]+1))
+  valuedict[i][0]=26
+
+#Dictionary containing arrays of error values for each h_k
+errordict={}
+for i in range(0,6):
+  errordict[i]=[None]*int(N_array[i]+1)
+  errordict[i][0]=0
+
+#Calculating y values for each hk and storing the errors in an array
+for i in range(0,6):
+  for j in range(1,int(N_array[i]+1)):
+      tdict[i][j]=step_size[i]*j
+      #Explicit Euler
+      ydict[i][j]=ydict[i][j-1]+step_size[i]*(function(tdict[i][j-1],ydict[i][j-1] ) + 
+      source(tdict[i][j-1],ydict[i][j-1]))
+      valuedict[i][j]=solution(step_size[i]*j)
+      errordict[i][j] =abs(ydict[i][j]-valuedict[i][j])
+#Getting maximum error
+epsilon_1=max(errordict[0])
+epsilon_2=max(errordict[1])
+epsilon_3=max(errordict[2])
+epsilon_4=max(errordict[3])
+epsilon_5=max(errordict[4])
+epsilon_6=max(errordict[5])
+
+#Creating a table with k,h_k and error values
+import pandas as pd
+from math import log
+data={"k value":[1,2,3,4,5,6],"h value":step_size,
+"Error values":[epsilon_1,epsilon_2,epsilon_3,epsilon_4,epsilon_5,epsilon_6]}
+table=pd.DataFrame(data)
+print(table)
+d=[None]*5
+for i in range (0,5):
+  d[i]=log(max(errordict[i+1])/max(errordict[i]))/log(1/2)
+print("Array showing log(epsilon_{k+1}/epsilon_k)/log(h_{k+1}/h_k)")
+print(d)
