@@ -1,0 +1,19 @@
+
+from numpy import tan
+import numpy as np
+#Equation to solve is f(y)=0
+def f(y):
+  return y+np.cos(y)
+#derivative of function's derivative
+def f_d(y):
+  return 1+-np.sin(y)
+#initial guess
+current_value=1
+for i in range(1,1000):
+#Stopping condition for Newton's Method
+  if abs(f(current_value))< 1e-10:
+     print(current_value)
+     break
+  else:
+      #Newton's method
+     current_value= current_value-(f(current_value)/f_d(current_value))
