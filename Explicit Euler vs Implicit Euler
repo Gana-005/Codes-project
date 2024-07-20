@@ -1,0 +1,100 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import ipywidgets as widgets
+from math import e
+#Here source term will adjust solution to a particular solution (which we want to be a solution)
+#dy/dt=f+source ,y=function
+#defining f
+def f(t,y):
+  return np.cos(t*y)
+#Partial derivative of f w.r.to.y
+def f_d(t,y):
+  return -np.sin(t*y)*t
+
+#prefixed function
+def function(t):
+  return (e**t)+(t-5)**2
+def function_derivative(t):
+  return (e**t)+2*(t-5)
+#definition of source term
+def source(t,y):
+ #dy/dt-f(t,y)
+ return function_derivative(t)-f(t,y)
+#source partial derivative wr to y
+def source_d(t,y):
+  return -f_d(t,y)
+
+
+
+#Explicit and implicit euler
+def curve_changer(N):
+    #calculating number of steps
+    k=4.0/N
+    #For collecting values of t at each step
+    t_R=[None]*int(N+1)
+    t_R[0]=0
+
+
+    #EXPLICIT EULER
+    #Creation of a list which will contain values of function at each step.
+    y_Explicit=[None]*int(N+1)
+    #Value of function at 0
+    y_Explicit[0]=26
+    for i in range(1,int(N+1)):
+      t_R[i]=k*i
+      #Finding y value at each step and adding it to the list.
+      y_Explicit[i]=k*f(k*(i-1),y_Explicit[i-1])+k*source(k*(i-1),y_Explicit[i-1])+y_Explicit[i-1]
+    #Plotting the Euler approximated function
+    plt.subplot(1,3,1)
+    plt.plot(t_R,y_Explicit,color="blue")
+    plt.title("Explicit Euler")
+    plt.xlabel("t")
+    plt.ylabel("y")
+    #Giving y axis range
+    plt.ylim(14,50)
+
+
+    #EXACT SOLUTION
+    #Creating an numpy array -Initial  value-0,Final value-4,Step=0.0001
+    t_Rn=np.arange(0.0,4.0,0.0001)
+    plt.subplot(1,3,2)
+    #function(t_Rn): passing an array to a function,it returns an array of y-values
+    plt.plot(t_Rn,function(t_Rn),color="red")
+    plt.title("Exact solution")
+    plt.xlabel("t")
+    plt.ylabel("y")
+    #Giving y axis range
+    plt.ylim(14,50)
+
+    #IMPLCIT EULER
+    def G(y_nm,y_n,k,t):
+      return y_nm-y_n-(k*f(t,y_nm)+k*source(t,y_nm))
+    #Derivative of G
+    def G_d(t,y):
+      return 1-k*f_d(t,y)-k*(source_d(t,y))
+    #Creation of a list which will contain values of function at each step.
+    y_Implicit=[1]*int(N+1)
+    #Value of function at 0
+    y_Implicit[0]=26
+    #Array for newton's method
+    y_O=[None]*10001
+    y_O[0]=1
+    for i in range(1,int(N+1)):
+      #Newton's Method
+      for j in range(0,10000):
+        y_O[j+1]= y_O[j]-(G(y_O[j],y_Implicit[i-1],k,k*i)/G_d(k*i,y_O[j]))
+        #Checking
+        if abs((y_O[j+1]-y_O[j])/(y_O[j]))< 0.000000000000001:
+          y_Implicit[i]=y_O[j]
+          break
+    plt.subplot(1,3,3)
+    plt.plot(t_R,y_Implicit)
+    plt.title("Implicit euler ")
+    plt.xlabel("t")
+    plt.ylabel("y")
+    #Giving y axis range
+    plt.ylim(14,50)
+    plt.tight_layout()
+    plt.show()
+#Function to create slider-Paramters-(Function to update the curve,N value=(start,end,step))
+widgets.interact(curve_changer,N=(1,150,1))
