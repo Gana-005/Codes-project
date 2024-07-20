@@ -1,0 +1,46 @@
+import matplotlib.pyplot as plt 
+import numpy as np
+from numpy import cos,sin
+#Importing python Library for creating slider
+import ipywidgets as widgets
+#defining function f,(dy/dt=f)
+def f(y):
+  return cos(y)
+#Partial derivative of f w.r.to.y_{n+1}
+def f_d(y):
+  return -sin(y)
+def curve_changer(N):
+   #step size
+    k=4.0/N
+    #equation to be solved for y_{n+1}
+    def G(y_nm,y_n,k):
+      return y_nm-y_n-(k*f(y_nm))
+    #Derivative of G w.r.to y_{n+1}
+    def G_d(t):
+      return 1-k*f_d(t)
+    #initial value
+    y_R=[1]*int(N+1)
+    #Value of function at 0
+    y_R[0]=0
+    #Array to be used for newton's method
+    y_O=[None]*10001
+    y_O[0]=1
+    for i in range(1,int(N+1)):
+      #Newton's Method
+      for j in range(0,10000):
+        y_O[j+1]= y_O[j]-(G(y_O[j],y_R[i-1],k)/G_d(y_O[j]))
+#stopping condition for Newton's method
+        if abs((y_O[j+1]-y_O[j])/(y_O[j]))< 0.000000000000001:
+          y_R[i]=y_O[j]
+          break
+    print("Function's value at 4")
+    print(y_R[int(N)])
+    #Plotting
+    t_R=np.arange(0,4.000000000001,k)
+    plt.plot(t_R,y_R)
+    plt.title("Implicit euler ")
+    plt.show()
+#slider
+widgets.interact(curve_changer,N=(1,150,1))
+
+
