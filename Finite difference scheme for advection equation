@@ -1,0 +1,45 @@
+import matplotlib.pyplot as plt
+import numpy as np
+import ipywidgets as widgets
+a=float(input("Enter the value of constant advection speed"))
+n_t=int(input("number of steps in time domain"))
+n_x=int(input("number of steps in space domain"))
+#Calculating step size
+h=10.0/n_x
+k=1.0/n_t
+#Function at t=0(Initial conditiion)
+def Initial_condition(x):
+  return x
+#Function at x=0(Boundary condition)
+def boundary(t):
+  return t**2
+def solution(t,x):
+      return t**2+x
+def source(t,x):
+  return 2*t+a
+def curve_changer(Time):
+  #i th array of dictionary is the values of x at i th partition of time.
+    yvalue_dict={}
+    for i in range(0,int(n_t+1)):
+      yvalue_dict[i]=[None]*int(n_x+1)
+      #Boundary conditions
+      yvalue_dict[i][0]=boundary(k*i)
+    #Collecting x values for plotting
+    xarray=[None]*int(n_x+1)
+    for i in range(0,int(n_x+1)):
+      xarray[i]=h*i
+      #Initial condition
+      yvalue_dict[0][i]=Initial_condition(h*i)
+    #Iteration
+    for i in range(1,int(n_t+1)):
+      for j in range(1,int(n_x+1)):
+            yvalue_dict[i][j]=(yvalue_dict[i-1][j])*(1-(k*a/h))+((k*a/h)*yvalue_dict[i-1][j-1])+k*source(k*(i-1),h*j)
+     #int(time/k) for accessing correct index
+    plt.plot(xarray,yvalue_dict[int(Time/k)],label="approximation")
+    exact=[None]*int(n_x+1)
+    for i in range(0,int(n_x+1)):
+      exact[i]=solution(Time,xarray[i])
+    plt.plot(xarray,exact,label="Exact")
+    plt.legend()
+    plt.show()
+widgets.interact(curve_changer,Time=(0,1,k))
