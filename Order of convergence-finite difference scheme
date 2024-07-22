@@ -1,0 +1,61 @@
+import numpy as np
+from math import log
+import pandas as pd
+
+a=float(input("Enter the value of constant advection speed"))
+n_t=int(input("number of steps in time domain"))
+k=1/n_t
+#Function at t=0(Initial conditiion)
+def Initial_condition(x):
+  return x
+#Function at x=0(Boundary condition)
+def boundary(t):
+  return t**2
+def solution(t,x):
+      return t**2+x
+#Source term
+def source(t,x):
+  return 2*t+a
+
+#Arrays and dictionaries initialisation
+step_size=[None]*6
+N_array=[None]*6
+errordict={}
+xarray={}
+#i th array of dictionary is the values of x at i th partition of time.
+yvalue_dict={}
+
+for i in range(0,6):
+  step_size[i]=2**(-(i+1))
+  N_array[i]=10.0/step_size[i]
+  errordict[i]=[None]*int((N_array[i])+1)
+  xarray[i]=[None]*int((N_array[i])+1)
+
+#Iteration
+for h in range(0,6):
+  for u in range(0,int(n_t+1)):
+    yvalue_dict[u]=[None]*int((N_array[h])+1)
+    #Boundary conditions
+    yvalue_dict[u][0]=boundary(k*u)
+  for j in range(0,int(N_array[h]+1)):
+    xarray[h][j]=step_size[h]*j
+    yvalue_dict[0][j]=Initial_condition(step_size[h]*j)
+  for i in range(1,int(n_t+1)):
+    for j in range(1,int(N_array[h]+1)):
+          yvalue_dict[i][j]=(yvalue_dict[i-1][j])*(1-((k*a)/step_size[h]))+(((k*a)/step_size[h])*yvalue_dict[i-1][j-1])+(k*source(k*(i-1),(step_size[h])*j))
+  #Error calculation
+  for j in range(0,int(N_array[h]+1)):
+   errordict[h][j]=abs((yvalue_dict[n_t][j]-solution(1.0,xarray[h][j])))
+
+Error_array=[None]*6
+for h in range(0,6):
+ Error_array[h]=max(errordict[h])
+data={"k value":[1,2,3,4,5,6],"h value":step_size,"Error values":Error_array}
+df=pd.DataFrame(data)
+print(df)
+d=[None]*5
+for i in range (0,5):
+  d[i]=log(Error_array[i+1]/(Error_array[i]))/log(1/2)
+print("Array showing log(epsilon_{k+1}/epsilon_k)/log(h_{k+1}/h_k)")
+print(d)
+print(yvalue_dict[n_t])
