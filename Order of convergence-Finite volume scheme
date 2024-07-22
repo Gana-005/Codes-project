@@ -1,0 +1,56 @@
+import numpy as np
+import pandas as pd
+from math import e,log
+#Functions
+def solution(t,x):
+  return (e**t)*np.sin(x)
+def variable_coefficient(t,x):
+ return x*(x-1)
+def Initial_condition(x):
+  return np.sin(x)
+def boundary_condition0(t):
+  return 0
+def boundary_condition1(t):
+  return (e**t)*np.sin(1)
+def source_term(t,x):
+  return (e**t)*(2*x*np.sin(x)+((x**2-x)*np.cos(x)))
+#input
+n_t=int(input("Number of steps in time domain"))
+k=1.0/n_t
+#Arrays and dictionaries to be used
+yvaluedict={}
+errordict={}
+xarraydict={}
+step_size=[None]*6
+N_array=[None]*6
+for h in range(0,6):
+  step_size[h]=2**-(h+1)
+  N_array[h]=int(1/step_size[h])
+  errordict[h]=[None]*int(N_array[h]+1)
+  xarraydict[h]=[None]*int(N_array[h]+1)
+for h in range(0,6):
+  for i in range(0,n_t+1):
+    yvaluedict[i]=[None]*int(N_array[h]+1)
+    yvaluedict[i][0]=boundary_condition0(i*k)
+    yvaluedict[i][N_array[h]]=boundary_condition1(i*k)
+  def flux(n,j):
+    return max(variable_coefficient(k*n,step_size[h]*j),0)*yvaluedict[n][int(j-(1/2))]+ (min(variable_coefficient(k*n,step_size[h]*j),0)*yvaluedict[n][int(j+(1/2))])
+  for i in range(0,N_array[h]+1):
+    xarraydict[h][i]=i*step_size[h]
+    yvaluedict[0][i]=Initial_condition(i*step_size[h])
+  for i in range(1,n_t+1):
+    for j in range(1,N_array[h]):
+      yvaluedict[i][j]=yvaluedict[i-1][j]-((k/step_size[h])*(flux(i-1,(j+(1/2)))-flux(i-1,(j-(1/2)))))+ k*source_term(i*k,j*step_size[h])
+  for j in range(0,N_array[h]+1):
+   errordict[h][j]=abs(yvaluedict[n_t][j]-solution(1.0,xarraydict[h][j]))
+Error=[None]*6
+for h in range(0,6):
+  Error[h]=max(errordict[h])
+data={"h value":step_size,"Error values":Error}
+df=pd.DataFrame(data)
+print(df)
+d=[None]*5
+for i in range (0,5):
+  d[i]=log(Error[i+1]/(Error[i]))/log(1/2)
+print("Array showing log(epsilon_{k+1}/epsilon_k)/log(h_{k+1}/h_k)")
+print(d)
