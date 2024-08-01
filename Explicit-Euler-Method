@@ -1,5 +1,6 @@
 
 import numpy as np
+import matplotlib.pyplot as plt
 import ipywidgets as widgets
 from math import e
 def function(t,y):
