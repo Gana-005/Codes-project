@@ -1,50 +1,45 @@
-import matplotlib.pyplot as plt
+
 import numpy as np
-from numpy import cos,sin
-#For creating slider
 import ipywidgets as widgets
-#defining function f,(dy/dt=f)
-def f(t,y):
-  return cos(t)
-#Function to be inputted in slider widget
+from math import e
+def function(t,y):
+  return np.cos(t*y)
+def solution(t):
+  return (e**t)+(t-5)**2
+def solution_derivative(t):
+  return (e**t)+2*(t-5)
+#here it's dy/dt-f(t,y)
+def source(t,y):
+  return solution_derivative(t)-function(t,y)
 def curve_changer(N):
-  #calculating step size
-    k=4.0/N
-    #Creation of a list with size (N+1) which will contain values of function at each step.
-    y_R=[None]*int(N+1)
-    #Value of function at 0
-    y_R[0]=0
-    #Creating list for collecting the t value at each step
-    t_R=[None]*int(N+1)
-    #Initial value of t
-    t_R[0]=float(0)
-    for i in range(1,int(N+1)):
-      #Adding values of t to the list at each step
-      t_R[i]=float(k*i)
-      #Finding y value at each step and adding it to the list.
-      y_R[i]=k*f(k*(i-1),y_R[i-1])+y_R[i-1]
-    print("Function's value at 4")
-    print(y_R[int(N)])
-    #Plotting the Euler approximated function
-    plt.subplot(1,2,1)
-    plt.plot(t_R,y_R,color="blue")
-    plt.title("Euler Approximation")
-    plt.xlabel("t")
-    plt.ylabel("y")
-    #Giving y axis range
-    plt.ylim(-1,1.25)
-    #Plotting sine function(real solution) as a subplot
-    #Creating an numpy array -Initial  value-0,Final value-4,Step=0.0001
-    t_Rn=np.arange(0.0,4.0,0.0001)
-    #Creating numpy array containing sine of the values in t_Rn
-    r = np.sin(t_Rn)
-    plt.subplot(1,2,2)
-    plt.plot(t_Rn,r,color="red")
-    plt.title("Exact solution")
-    plt.xlabel("t")
-    plt.ylabel("y")
-    #Giving y axis range
-    plt.ylim(-1,1.25)
-    plt.show()
-#Function to create slider-Paramters-(Function to update the curve,N value=(start,end,step))
-widgets.interact(curve_changer,N=(1,150,1))
+  #Calculating Step size
+  h=4.0/N
+  #for storing yvalues
+  yvalue=[None]*(N+1)
+  #for storing tvalues
+  tvalue=[None]*(N+1)
+  realvalue=[None]*(N+1)
+  #Initial value
+  yvalue[0]=26
+  tvalue[0]=0
+  realvalue[0]=26
+  #scheme
+  for j in range(1,int(N+1)):
+        tvalue[j]=h*j
+        #Explicit Euler
+        yvalue[j]=yvalue[j-1]+h*(function(tvalue[j-1],yvalue[j-1])+source(tvalue[j-1],yvalue[j-1]))
+        realvalue[j]=solution(h*j)
+  plt.subplot(1,2,1)
+  #Plotting euler approximated solutions
+  plt.plot(tvalue,yvalue,color="blue")
+  plt.title("Euler Approximation")
+  plt.xlabel("t")
+  plt.ylabel("y")
+  #Plotting exact solution
+  plt.subplot(1,2,2)
+  plt.plot(tvalue,realvalue,color="red")
+  plt.title("Exact solution")
+  plt.xlabel("t")
+  plt.ylabel("y")
+  plt.show()
+widgets.interact(curve_changer,N=(1,300,1))
