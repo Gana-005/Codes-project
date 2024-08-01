@@ -1,46 +1,67 @@
-import matplotlib.pyplot as plt 
+ import matplotlib.pyplot as plt
 import numpy as np
-from numpy import cos,sin
-#Importing python Library for creating slider
+from numpy import cos,sin,e
 import ipywidgets as widgets
-#defining function f,(dy/dt=f)
-def f(y):
-  return cos(y)
-#Partial derivative of f w.r.to.y_{n+1}
-def f_d(y):
-  return -sin(y)
+#defining function
+def function(t,y):
+  return np.cos(t*y)
+def function_derivative(t,y):
+  return -np.sin(t*y)*t  
+def solution(t):
+  return (e**t)+(t-5)**2
+def solution_derivative(t):
+  return (e**t)+2*(t-5)
+#here it's dy/dt-f(t,y)
+def source(t,y):
+  return solution_derivative(t)-function(t,y)
+def source_derivative(t,y):
+    return -function_derivative(t,y)
 def curve_changer(N):
-   #step size
-    k=4.0/N
-    #equation to be solved for y_{n+1}
-    def G(y_nm,y_n,k):
-      return y_nm-y_n-(k*f(y_nm))
+  #Calculating Step size
+  k=4.0/N
+  #equation to be solved for y_{n+1}
+  def G(y_nm,y_n,k,t):
+        return y_nm-y_n-(k*function(t,y_nm)+k*source(t,y_nm))
     #Derivative of G w.r.to y_{n+1}
-    def G_d(t):
-      return 1-k*f_d(t)
-    #initial value
-    y_R=[1]*int(N+1)
-    #Value of function at 0
-    y_R[0]=0
-    #Array to be used for newton's method
-    y_O=[None]*10001
-    y_O[0]=1
-    for i in range(1,int(N+1)):
-      #Newton's Method
-      for j in range(0,10000):
-        y_O[j+1]= y_O[j]-(G(y_O[j],y_R[i-1],k)/G_d(y_O[j]))
-#stopping condition for Newton's method
-        if abs((y_O[j+1]-y_O[j])/(y_O[j]))< 0.000000000000001:
-          y_R[i]=y_O[j]
-          break
-    print("Function's value at 4")
-    print(y_R[int(N)])
-    #Plotting
-    t_R=np.arange(0,4.000000000001,k)
-    plt.plot(t_R,y_R)
-    plt.title("Implicit euler ")
-    plt.show()
-#slider
-widgets.interact(curve_changer,N=(1,150,1))
+  def G_d(t,y):
+        return 1-(k*function_derivative(t,y))+(k*(source_derivative(t,y)))
 
+  #for storing yvalues
+  yvalue=[26]*(N+1)
+  #for storing tvalues
+  tvalue=[None]*(N+1)
+  realvalue=[None]*(N+1)
+  #Initial value
+  yvalue[0]=26
+  tvalue[0]=0
+  realvalue[0]=26
+  #Array to be used for newton's method
+  y_O=[None]*10001
+  y_O[0]=1
+  #scheme
+  for i in range(1,int(N+1)):
+    tvalue[i]=k*i
+    realvalue[i]=solution(k*i)
+    #Newton's Method
+    for p in range(0,100000):
+          y_O[p+1]= y_O[p]-(G(y_O[p],yvalue[i-1],k,tvalue[i])/G_d(tvalue[i],y_O[p]))
+          #Checking
+          if abs(G(y_O[p],yvalue[i-1],k,tvalue[i])) < 0.01:
+            yvalue[i]=y_O[p]
+            break
 
+       
+  plt.subplot(1,2,1)
+  #Plotting euler approximated solutions
+  plt.plot(tvalue,yvalue,color="blue")
+  plt.title("Euler Approximation")
+  plt.xlabel("t")
+  plt.ylabel("y")
+  #Plotting exact solution
+  plt.subplot(1,2,2)
+  plt.plot(tvalue,realvalue,color="red")
+  plt.title("Exact solution")
+  plt.xlabel("t")
+  plt.ylabel("y")
+  plt.show()
+widgets.interact(curve_changer,N=(1,300,1))
