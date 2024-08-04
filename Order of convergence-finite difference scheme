@@ -7,15 +7,15 @@ n_t=int(input("number of steps in time domain"))
 k=1/n_t
 #Function at t=0(Initial conditiion)
 def Initial_condition(x):
-  return x
+  return -(e**x)
 #Function at x=0(Boundary condition)
 def boundary(t):
-  return t**2
+  return t - 1
 def solution(t,x):
-      return t**2+x
+      return (e**x)*(t-1)
 #Source term
 def source(t,x):
-  return 2*t+a
+  return (e**x) + a*(e**x)*(t-1)
 
 #Arrays and dictionaries initialisation
 step_size=[None]*6
