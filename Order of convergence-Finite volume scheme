@@ -1,19 +1,19 @@
 import numpy as np
 import pandas as pd
-from math import e,log
+from math import e,log,cos
 #Functions
 def solution(t,x):
-  return (e**t)*np.sin(x)
+  return e**(t*x)*cos(x)
 def variable_coefficient(t,x):
- return x*(x-1)
+ return x**2 + 1
 def Initial_condition(x):
-  return np.sin(x)
+  return cos(x)
 def boundary_condition0(t):
-  return 0
+  return 1
 def boundary_condition1(t):
-  return (e**t)*np.sin(1)
+  return (e**t)*cos(1)
 def source_term(t,x):
-  return (e**t)*(2*x*np.sin(x)+((x**2-x)*np.cos(x)))
+  return x * np.exp(t * x) * np.cos(x) + (x**2 + 1) * t * np.exp(t * x) * np.cos(x) - (x**2 + 1) * np.exp(t * x) * np.sin(x) + 2*x * np.exp(t * x) * np.cos(x)
 #input
 n_t=int(input("Number of steps in time domain"))
 k=1.0/n_t
@@ -23,6 +23,7 @@ errordict={}
 xarraydict={}
 step_size=[None]*6
 N_array=[None]*6
+#here same dictionary is using for each h values.So y values won't be stored.But in each iteration,error values will be stored
 for h in range(0,6):
   step_size[h]=2**-(h+1)
   N_array[h]=int(1/step_size[h])
@@ -34,7 +35,7 @@ for h in range(0,6):
     yvaluedict[i][0]=boundary_condition0(i*k)
     yvaluedict[i][N_array[h]]=boundary_condition1(i*k)
   def flux(n,j):
-    return max(variable_coefficient(k*n,step_size[h]*j),0)*yvaluedict[n][int(j-(1/2))]+ (min(variable_coefficient(k*n,step_size[h]*j),0)*yvaluedict[n][int(j+(1/2))])
+    return (max(variable_coefficient(k*n,step_size[h]*j),0)*yvaluedict[n][int(j-(1/2))])+ (min(variable_coefficient(k*n,step_size[h]*j),0)*yvaluedict[n][int(j+1/2)])
   for i in range(0,N_array[h]+1):
     xarraydict[h][i]=i*step_size[h]
     yvaluedict[0][i]=Initial_condition(i*step_size[h])
