@@ -2,38 +2,47 @@ import matplotlib.pyplot as plt
 import numpy as np
 from math import e
 import ipywidgets as widgets
+#functions
 def solution(t,x):
-  return (e**t)*np.sin(x)
+  return e**(t*x)*cos(x)
 def variable_coefficient(t,x):
- return x*(x-1)
+ return  x**2 + 1
 def Initial_condition(x):
-  return np.sin(x)
+  return cos(x)
 def boundary_condition0(t):
-  return 0
+  return 1
 def boundary_condition1(t):
-  return (e**t)*np.sin(1)
+  return (e**t)*cos(1)
 def source_term(t,x):
-  return (e**t)*(2*x*np.sin(x)+((x**2-x)*np.cos(x)))
+  return x * np.exp(t * x) * np.cos(x) + (x**2 + 1) * t * np.exp(t * x) * np.cos(x) - (x**2 + 1) * np.exp(t * x) * np.sin(x) + 2*x * np.exp(t * x) * np.cos(x)
+
 n_x=int(input("Number of steps in space domain"))
 n_t=int(input("Number of steps in time domain"))
+#stepsizes
 h=1.0/n_x
 k=1.0/n_t
+#function to be inputted in widgets for creating slider
 def curve_changer(Time):
+  #dictionary which will contain values of x at each time.i th index of dictionary contains array of x values at ith partition of time.
   yvaluedict={}
+  #for storing x values for plotting
   xarray=[None]*int(n_x+1)
   for i in range(0,n_t+1):
     yvaluedict[i]=[None]*int(n_x+1)
     yvaluedict[i][0]=boundary_condition0(i*k)
-    #yvaluedict[i][n_x]=boundary_condition1(i*k)
+    yvaluedict[i][n_x]=boundary_condition1(i*k)
   def flux(n,j):
     return max(variable_coefficient(k*n,h*j),0)*yvaluedict[n][int(j-(1/2))] + min(variable_coefficient(k*n,h*j),0)*yvaluedict[n][int(j+(1/2))]
   for i in range(0,n_x+1):
     xarray[i]=i*h
+    #Initial conditions
     yvaluedict[0][i]=Initial_condition(i*h)
   for i in range(1,n_t+1):
     for j in range(1,n_x):
+      #scheme
       yvaluedict[i][j]=yvaluedict[i-1][j]-((k/h)*(flux(i-1,(j+(1/2)))-flux(i-1,(j-(1/2)))))+ k*source_term(i*k,j*h)
   plt.plot(xarray,yvaluedict[int(Time/k)],label="Approximation")
+  #array for plotting exact solution
   exact=[None]*int(n_x+1)
   for i in range(0,int(n_x+1)):
           exact[i]=solution(Time,xarray[i])
